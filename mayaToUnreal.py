@@ -42,4 +42,7 @@ for oldShader in oldShaders:
         
             except TypeError:#Errors if the map dont exist
                 print("Map",map," doesn't exist (probably)")
-        print("Finished with",oldShader,"\n----------------")
+        print("Finished making new shader",oldShader)
+        cmds.hyperShade(objects=oldShader)#Selects all objects with the old shader
+        cmds.hyperShade(assign=newShader)#Assigns the new shader to all selected objects (Hopefully the same ones with the old shader)
+
