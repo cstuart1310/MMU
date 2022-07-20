@@ -20,6 +20,15 @@ print("""
 
 MMU
 
+\|/          (__)    
+     `\------(oo)
+       ||    (__)
+       ||w--||     \|/
+   \|/
+
+(Maya Make Unreal)
+
+
 Callum Stuart
 """)
 
