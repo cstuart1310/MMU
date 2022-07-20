@@ -3,16 +3,17 @@ import maya.mel as mel
 
 newShaderType="phongE"
 
-oldShaders=["standardSurface"]
+oldShaders=["standardSurface"]#Current shader type that you want to convert
+maps=["baseColor","diffuseRoughness","metalness","specularRoughness","normalCamera"]#Maps to grab files from and re-link to the new material
 
-maps=["baseColor","diffuseRoughness","metalness","specularRoughness","normalCamera"]
-
-def getShaders():
+def getShaders():#Gets the list of current shaders to convert
     
     shaders=cmds.ls(exactType="standardSurface")
     print(shaders)
     return shaders
 
+
+#Start
 
 oldShaders=getShaders()
 
