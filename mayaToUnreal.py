@@ -1,12 +1,11 @@
 import maya.cmds as cmds
 import maya.mel as mel
 
-newShaderType="phongE"
+newShaderType="blinn"
 
-#oldShaders=["standardSurface"]#Current shader type that you want to convert
+#oldShaders=["standardSurface"]
 oldShader="standardSurface"
 ignoredMats=["standardSurface1"]
-maps=["baseColor","diffuseRoughness","metalness","specularRoughness","normalCamera"]#Maps to grab files from and re-link to the new material
 
 def getShaders():#Gets the list of current shaders to convert
     
@@ -77,7 +76,7 @@ for oldShader in oldShaders:
 
         try:
             cmds.connectAttr(base,newShaderName+'.color', force=True)
-            cmds.connectAttr(specRoughness,newShaderName+'.roughness', force=True)
+            cmds.connectAttr(specRoughness,newShaderName+'.diffuse', force=True)
             cmds.connectAttr(bump,newShaderName+'.normalCamera', force=True)
 
         except Exception as e:
