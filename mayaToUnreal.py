@@ -36,6 +36,10 @@ def setupNewShader(newShaderType,newShaderName):#Creates a new shader and a shad
     cmds.connectAttr(newShaderName+".outColor", newShaderName+"SG.surfaceShader")
     print("Created:",newShader)
         
+def convertFileTextures(shader):
+    shaderGroup = cmds.listConnections(shader,type='shadingEngine')
+    obj=cmds.hyperShade(objects=shader,add=True)[0]#selects the first object with the material
+    cmds.convertSolidTx(shader, obj, fillTextureSeams=True,resolutionX=4096,resolutionY=4096,fileFormat="TIFF")
 
 
 #Start
@@ -76,7 +80,11 @@ for oldShader in oldShaders:
 
         try:
             cmds.connectAttr(base,newShaderName+'.color', force=True)
-            cmds.connectAttr(specRoughness,newShaderName+'.diffuse', force=True)
+            print("specRoughness:",specRoughness)
+            specRoughness=specRoughness.replace(".outColorR",".outColor")
+            specRoughness=specRoughness.replace(".outAlpha",".outColor")
+
+            cmds.connectAttr(specRoughness,newShaderName+'.specularColor', force=True)
             cmds.connectAttr(bump,newShaderName+'.normalCamera', force=True)
 
         except Exception as e:
