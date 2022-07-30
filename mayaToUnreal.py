@@ -74,10 +74,16 @@ for oldShader in oldShaders:
             base=cmds.connectionInfo(oldShader+'.baseColor', sfd=True)
             specRoughness=cmds.connectionInfo(oldShader+'.specularRoughness', sfd=True)
             bump=cmds.connectionInfo(oldShader+'.normalCamera', sfd=True)
+            metalness=cmds.connectionInfo(oldShader+".metalness",sfd=True)
         except RuntimeError as e:
             print("Error getting connections or something")
             print(e)
 
+        if metalness=='':
+            metalness==(cmds.getAttr(oldShader+".metalness"))
+
+        if specRoughness=='':
+            specRoughness=(cmds.getAttr(oldShader+".specularRoughness"))
         try:
             cmds.connectAttr(base,newShaderName+'.color', force=True)
             print("specRoughness:",specRoughness)
@@ -86,6 +92,7 @@ for oldShader in oldShaders:
 
             cmds.connectAttr(specRoughness,newShaderName+'.specularColor', force=True)
             cmds.connectAttr(bump,newShaderName+'.normalCamera', force=True)
+            cmds.connectAttr(metalness,newShaderName+',reflectivity',force=True)
 
         except Exception as e:
             print("Errored linking textures:")
