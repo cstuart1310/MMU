@@ -1,8 +1,19 @@
 import maya.cmds as cmds
 
 # Get a list of all the deformer sets in the scene:
-setList=cmds.listSets( allSets=True, ets=True )
+
 #print(setList)
+outDir="out/"
+exportKey="charName" #key used to identify what's relevant
+
+sceneName= cmds.file(q=True, sn=True) #Gets file name as string
+sceneNo=(sceneName.split("_")[0]).split("/")[1]
+shotNo=sceneName.split("_")[1]
+versionNo=(sceneName.split("_")[2]).replace(".mb","")
+
+print("Scene No:",sceneNo)
+print("Shot No",shotNo)
+print("versionNo",versionNo)
 
 exportKey="charName"
 sceneName= cmds.file(q=True, sn=True)
