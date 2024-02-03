@@ -1,10 +1,6 @@
 import maya.standalone
 import maya.cmds as cmds
 
-maya.standalone.initialize(name='python')#Inits a headless maya instance
-
-
-
 def printSets(sceneFile):
     # Open the Maya scene file
     cmds.file(sceneFile, open=True, force=True)
@@ -31,7 +27,7 @@ if __name__ == "__main__":
 
     # Redirect Maya startup log to a file
     log_file = "maya_batch_log.txt"
-    maya.standalone.initialize(name='python', standalone=True, plugin=True, script=True, verbose=False, outputLog=log_file)
+    maya.standalone.initialize(name='python')
 
     printSets(sceneFile)
 
