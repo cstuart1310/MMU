@@ -13,22 +13,25 @@ def beginSetExporter():
     mayaCommand=mayaBinDir+"\mayapy "+pluginDir+"\setExporter.py "+scenePath #Command to be run
     print(mayaCommand)
     mayaProcess = subprocess.call(mayaCommand)#runs the command and waits until done. Printed output from subprocess is piped to invoker
-    #output, outBad = mayaProcess.communicate() #captures the printed output
+    readImportPaths()
+
+def readImportPaths():#Reads paths of FBXs to import which were written by the setExporter
+    print("Reading exports")
+    outPathFile=open("D:\Coding\Python\VFX\Maya\MayaToUnreal\mayaToUnreal\outPaths.txt","r")#Opens the file
+    for outPath in outPathFile.readlines():#Loops through each line
+        outPath=outPath.replace("/","\\")
+        outPath=outPath.replace("\n","")#Removes newlines (This line fixed a bug that took me 25 mins to troubleshoot)
+        importFilebox(outPath) #Imports the file from the path
     
-    # for line in output:
-    #     if "Out path:" in line:
-    #         importPath=line.replace("Out path","")
-    #         importFilebox(importPath)
-
-
 
 def importFilebox(importPath):
+    print("Importing:",importPath)
     # Get the current editor level
     level = unreal.EditorLevelLibrary.get_editor_world()
 
     # Create a new import task
     import_task = unreal.AssetImportTask()
-    import_task.filename = r"C:\Users\CallyWally\Documents\CS-MR-2TB\Modelling\MMU\scenes\sceneNo_shotNo_exportSet_setBrain.fbx"
+    import_task.filename = importPath
     import_task.destination_path = "/Game/ImportedMeshes"  # Set your desired destination path
 
     # Set the options for the import task

@@ -7,7 +7,7 @@ import maya.standalone #runs maya headlessly
 import os
 import sys #arg reading
 
-
+outPathFile="D:\Coding\Python\VFX\Maya\MayaToUnreal\mayaToUnreal\outPaths.txt"
 
 def initMaya():
     maya.standalone.initialize(name='python')
@@ -47,6 +47,11 @@ def chooseSet(mayaSets):
     chosenSetIndex=input("Set to export:")
     return mayaSets[chosenSetIndex]
 
+def writeOutputPath(outputPath):#Writes output path to txt so can be read by invoker (Easier to deal with than pipes)
+    fbxFile=open(outPathFile,"a")
+    fbxFile.write((outputPath+"\n"))
+    fbxFile.close()
+
 
 def exportSet(parent):
     children = cmds.sets(parent, q=True)#All children of set
@@ -65,16 +70,19 @@ def exportSet(parent):
             print("Output command:",fbxCommand)
             cmds.loadPlugin("fbxmaya.mll")#Ensures the FBX plugin is loaded (May not due to maya standalone)
             mel.eval(fbxCommand)#Runs the command within MEL as there is no CMDS integration
+            writeOutputPath(outName)
 
 
 #main
 exportAsIndividual=True #Whether or not to export each child as a single FBX each, or export all children as one FBX
 sceneFile = sys.argv[1] #Gets scene path from argument
+open(outPathFile,"w").close()#Clears file on new run
 initMaya()
 mayaSets=getSets()
-chosenSet="set1"#chooseSet(mayaSets)
+chosenSet="exportSet"#chooseSet(mayaSets)
 exportSet(chosenSet)
 
 
 # Close the instance to prevent memory leak
 maya.standalone.uninitialize()
+
