@@ -10,8 +10,8 @@ import sys #arg reading
 outPathFile="D:\Coding\Python\VFX\Maya\MayaToUnreal\mayaToUnreal\outPaths.txt"
 
 def initMaya():
-    maya.standalone.initialize(name='python')
-    cmds.file(sceneFile, open=True, force=True)
+    maya.standalone.initialize(name='python')#Starts a maya standalone instance (Essentially headless maya)
+    cmds.file(sceneFile, open=True, force=True)#Opens the given scene file
 
 def getSets():
     # Get all sets from the outliner
