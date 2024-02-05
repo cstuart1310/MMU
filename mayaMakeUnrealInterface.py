@@ -4,10 +4,10 @@ import subprocess #Call the setExporter from within the mayaPy interpreter
 import os #File removing
 import sys #Reading command-line arguments
 import unreal
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtUiTools import QUiLoader
-from PySide2.QtCore import QSize, Qt
-from PySide2.QtWidgets import QApplication, QMainWindow, QPushButton
+from PySide2 import *
+from PySide2.QtUiTools import *
+from PySide2.QtCore import *
+from PySide2.QtWidgets import *
 
 
 
@@ -46,6 +46,16 @@ def importFilebox(importPath):
     os.remove(importPath) #Deletes the FBX produced by the exporter, as it is now saved within the UE project.
     print("Deleted file",importPath,"\n")
 
+def openFileDialog(window,lineEdit):
+    options = QFileDialog.Options()
+    options |= QFileDialog.DontUseNativeDialog
+    file_dialog = QFileDialog()
+    filePath, _ = file_dialog.getOpenFileName(window, "Open File", "", "All Files (*);;Text Files (*.txt)", options=options)
+    lineEdit.setText(filePath)
+    # Update the text input with the selected file path
+
+
+
 #-----UI-----
 
 def initUI():#Launches the UI
@@ -63,6 +73,12 @@ def initUI():#Launches the UI
     #buttons
     window.pushButton_import.clicked.connect(lambda: getInputData(window))#When import button is pressed, run getImportData
     window.pushButton_cancel.clicked.connect(lambda: window.close())#When cancel button is pressed, close the window
+    window.toolButton_scenePath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_scenePath))
+    window.toolButton_pluginPath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_pluginPath))
+    window.toolButton_binPath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_binPath))
+
+
+
 
     window.show()
     app.exec_()
