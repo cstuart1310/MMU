@@ -49,10 +49,12 @@ def importFilebox(importPath):
 def openFileDialog(window,lineEdit):
     options = QFileDialog.Options()
     options |= QFileDialog.DontUseNativeDialog
-    file_dialog = QFileDialog()
-    filePath, _ = file_dialog.getOpenFileName(window, "Open File", "", "All Files (*);;Text Files (*.txt)", options=options)
-    lineEdit.setText(filePath)
-    # Update the text input with the selected file path
+    fileDialog = QFileDialog()
+    fileDialog.setDirectory(lineEdit.text())#Sets the fileDialogue to open in the currently entered dir in the input box
+    filePath, _ = fileDialog.getOpenFileName(window, "Open File", "", "All Files (*);;Text Files (*.txt)", options=options)
+    print("Filepath:",filePath)
+    if filePath != "":#If the filepath is something (Cancel button returns an empty string)
+        lineEdit.setText(filePath)#When file is selected, update the passed input box
 
 
 
