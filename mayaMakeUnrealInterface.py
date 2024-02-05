@@ -13,15 +13,15 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QPushButton
 
 
 #-----File import/exporting-----
-def beginSetExporter(mayaBinDir,pluginDir,scenePath):
-    mayaCommand=mayaBinDir+"\mayapy "+pluginDir+"\setExporter.py "+scenePath #Command to be run
+def beginSetExporter(mayaBinDir,pluginDir,scenePath,exportAsIndividual):
+    mayaCommand=mayaBinDir+"\mayapy "+pluginDir+"\setExporter.py "+scenePath+" "+exportAsIndividual #Command to be run
     print(mayaCommand)
-    subprocess.call(mayaCommand)#runs the command and waits until done. Printed output from subprocess is piped to invoker
-    readImportPaths()
+    #subprocess.call(mayaCommand)#runs the command and waits until done. Printed output from subprocess is piped to invoker
+    #readImportPaths()
 
 def readImportPaths():#Reads paths of FBXs to import which were written by the setExporter
     print("Reading exports")
-    outPathFile=open("D:\Coding\Python\VFX\Maya\MayaToUnreal\mayaToUnreal\outPaths.txt","r")#Opens the file
+    outPathFile=open(pluginDir+"outPaths.txt","r")#Opens the file
     for outPath in outPathFile.readlines():#Loops through each line
         outPath=outPath.replace("/","\\")
         outPath=outPath.replace("\n","")#Removes newlines (This line fixed a bug that took me 25 mins to troubleshoot)
@@ -55,8 +55,14 @@ def initUI():#Launches the UI
         app = QApplication.instance()#Launch a new instance
     uiPath=pluginDir+"\MMU_UE_UI.ui"
     window = loader.load(uiPath, None)#Loads UI from file
+
+    #UI setup
     window.lineEdit_pluginPath.setText(pluginDir)#Sets the text in the plugin path to the gotten value
-    window.pushButton.clicked.connect(lambda: getInputData(window))
+    
+    #buttons
+    window.pushButton_import.clicked.connect(lambda: getInputData(window))#When import button is pressed, run getImportData
+    window.pushButton_cancel.clicked.connect(lambda: window.close())#When cancel button is pressed, close the window
+
     window.show()
     app.exec_()
 
@@ -65,26 +71,17 @@ def getInputData(window):#Gets data from input boxes and then passes it to the m
     mayaBinDir=window.lineEdit_binPath.text()
     pluginDir=window.lineEdit_pluginPath.text()
     scenePath=window.lineEdit_scenePath.text()
-    scenePath=r"C:\Users\CallyWally\Documents\CS-MR-2TB\Modelling\MMU\scenes\sceneNo_shotNo_versionNo.mb" #scene to be opened
-    mayaBinDir=r"C:\Program Files\Autodesk\Maya2023\bin"#Dir containing mayapy
-    pluginDir=r"D:\Coding\Python\VFX\Maya\MayaToUnreal\mayaToUnreal"
 
-    print(mayaBinDir)
-    print(pluginDir)
-    print(scenePath)
-    beginSetExporter(mayaBinDir,pluginDir,scenePath)
+    if window.radioButton_exportAsIndividualTrue.isChecked():
+        exportAsIndividual="individual"
+    elif window.radioButton_exportAsIndividualFalse.isChecked():
+        exportAsIndividual="single"
+
+    beginSetExporter(mayaBinDir,pluginDir,scenePath,exportAsIndividual)
     window.close()
 
 #-----main-----
-# mayaBinDir=sys.argv[1]#Dir containing mayapy interpreter
-# pluginDir=sys.argv[2] #Path containing these scripts/shared data
-# scenePath=sys.argv[3] #scene to be opened
-
-mayaBinDir=r"C:\Program Files\Autodesk\Maya2023\bin"#Dir containing mayapy
 pluginDir=(os.path.realpath(__file__)).replace("mayaMakeUnrealInterface.py","")
-print(pluginDir)
-scenePath=r"C:\Users\CallyWally\Documents\CS-MR-2TB\Modelling\MMU\scenes\sceneNo_shotNo_versionNo.mb" #scene to be opened
-
 
 initUI()
 
