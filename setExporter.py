@@ -25,6 +25,7 @@ Launching headless Maya instance to export sets.
           
 A lot of text is going to show in this window, all of it can be safely ignored.
 """)
+    print("_"*20)#nice spacer
     maya.standalone.initialize(name='python')#Starts a maya standalone instance (Essentially headless maya)
     cmds.file(scenePath, open=True, force=True)#Opens the given scene file
 
@@ -65,17 +66,22 @@ def exportSet(parent):
     print("Children:",children)
     if children==None:#If children found is type None (Not to be confused with finding no children)
         cmds.error("No children found. Check that a set is selected and that it has children.")
-    else:#If children are found
-        for child in children:#Loops through each child in the set (Grandchildren are selected when their parent is)
-            if exportAsIndividual==True:#One FBX per child (Grandchildren merged with parents)
-                cmds.select(child,add=False)#Adds the child to the selection
-            elif exportAsIndividual==False:#One FBX per set (Set's children, grandchildren etc all in one FBX)
-                cmds.select(child,add=True)#Replaces the selection with the children
+    elif children!=None:#If multiple children are found
+        cmds.loadPlugin("fbxmaya.mll")#Ensures the FBX plugin is loaded (May not due to maya standalone)
+
+        if exportAsIndividual==True:#Export one FBX per child
+            for child in children:
+                cmds.select(child,add=False)
+                outName=getOutName(exportAsIndividual,parent,child)#Generates path for FBX to write to
+                fbxCommand='file -force -options "" -typ "FBX export" -pr -es "'+outName+'";'#exports using default FBX export settings        
+                mel.eval(fbxCommand)#Runs the command within MEL as there is no CMDS integration
+                writeOutputPath(outName)
+
+        elif exportAsIndividual==False:#Export one FBX per scene
+            for child in children:
+                cmds.select(child,add=True)
             outName=getOutName(exportAsIndividual,parent,child)#Generates path for FBX to write to
-            print("Out path:",outName)
-            fbxCommand='file -force -options "" -typ "FBX export" -pr -es "'+outName+'";'#exports using default FBX export settings
-            print("Output command:",fbxCommand)
-            cmds.loadPlugin("fbxmaya.mll")#Ensures the FBX plugin is loaded (May not due to maya standalone)
+            fbxCommand='file -force -options "" -typ "FBX export" -pr -es "'+outName+'";'#exports using default FBX export settings        
             mel.eval(fbxCommand)#Runs the command within MEL as there is no CMDS integration
             writeOutputPath(outName)
 
