@@ -73,15 +73,31 @@ def initUI():#Launches the UI
     #buttons
     window.pushButton_import.clicked.connect(lambda: getInputData(window))#When import button is pressed, run getImportData
     window.pushButton_cancel.clicked.connect(lambda: window.close())#When cancel button is pressed, close the window
+
+    #File path buttons
     window.toolButton_scenePath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_scenePath))
     window.toolButton_pluginPath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_pluginPath))
     window.toolButton_binPath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_binPath))
-
-
-
-
+    loadPastValues(window)#Attempts to restore last successfully used values
     window.show()
     app.exec_()
+
+def loadPastValues(window):#Reads past successful values from file and places them into text boxes
+    pastValueFile=(pluginDir+"lastValues.txt")
+    if os.path.isfile(pastValueFile):#If there is a past value file
+        pastValueFile = open(pastValueFile,"r")
+        pastValues=pastValueFile.readlines()
+        #Doesn't set plugin path bcs plugin path must be correct for rest to work
+        window.lineEdit_binPath.setText(pastValues[1].replace("\n",""))
+        window.lineEdit_scenePath.setText(pastValues[2].replace("\n",""))
+
+def writePastValues(pluginDir,mayaBinDir,scenePath):#Saves values to text file
+    pastValueFile=open((pluginDir+"lastValues.txt"),"w")#Opens/creates the file, overwriting existing data
+    pastValueFile.write(pluginDir+"\n")
+    pastValueFile.write(mayaBinDir+"\n")
+    pastValueFile.write(scenePath+"\n")
+    pastValueFile.close()#Closes file and saves changes
+    print("Saved paths to txt")
 
 def getInputData(window):#Gets data from input boxes and then passes it to the maya parts of the script
     print("Getting data from input boxes")
@@ -100,9 +116,12 @@ def getInputData(window):#Gets data from input boxes and then passes it to the m
         exportAsIndividual="single"
     window.close()
     beginSetExporter(mayaBinDir,pluginDir,scenePath,exportAsIndividual)
+    writePastValues(pluginDir,mayaBinDir,scenePath)#If setExporter doesn't crash, saves successful values
     
 
 #-----main-----
 pluginDir=(os.path.realpath(__file__)).replace("mayaMakeUnrealInterface.py","")#Gets the plugin folder's path
+
+
 initUI()
 
