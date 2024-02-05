@@ -46,17 +46,21 @@ def importFilebox(importPath):
     os.remove(importPath) #Deletes the FBX produced by the exporter, as it is now saved within the UE project.
     print("Deleted file",importPath,"\n")
 
-def openFileDialog(window,lineEdit):
+def openFileDialog(window, lineEdit,chooseFolder):
     options = QFileDialog.Options()
     options |= QFileDialog.DontUseNativeDialog
     fileDialog = QFileDialog()
-    fileDialog.setDirectory(lineEdit.text())#Sets the fileDialogue to open in the currently entered dir in the input box
-    filePath, _ = fileDialog.getOpenFileName(window, "Open File", "", "All Files (*);;Text Files (*.txt)", options=options)
-    print("Filepath:",filePath)
-    if filePath != "":#If the filepath is something (Cancel button returns an empty string)
-        lineEdit.setText(filePath)#When file is selected, update the passed input box
 
-
+    if chooseFolder==True:
+        folderPath = fileDialog.getExistingDirectory(window, "Open Folder", lineEdit.text(), options=options)
+        print("Folder Path:", folderPath)
+        if folderPath != "":
+            lineEdit.setText(folderPath)
+    else:
+        filePath, _ = fileDialog.getOpenFileName(window, "Open File", lineEdit.text(), "All Files (*);;Text Files (*.txt)", options=options)
+        print("File Path:", filePath)
+        if filePath != "":
+            lineEdit.setText(filePath)
 
 #-----UI-----
 
@@ -77,9 +81,9 @@ def initUI():#Launches the UI
     window.pushButton_cancel.clicked.connect(lambda: window.close())#When cancel button is pressed, close the window
 
     #File path buttons
-    window.toolButton_scenePath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_scenePath))
-    window.toolButton_pluginPath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_pluginPath))
-    window.toolButton_binPath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_binPath))
+    window.toolButton_scenePath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_scenePath,False))
+    window.toolButton_pluginPath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_pluginPath,True))
+    window.toolButton_binPath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_binPath,True))
     loadPastValues(window)#Attempts to restore last successfully used values
     window.show()
     app.exec_()
