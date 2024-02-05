@@ -32,16 +32,22 @@ children = cmds.sets(parent, q=True)
 print("Children:",children)
 if children==None:#If children found is type None (Not to be confused with finding no children)
     cmds.error("No children found. Check that a set is selected and that it has children.")
-else:#If children are found
+elif children!=None and len(children)>1:#If multiple children are found
     for child in children:#Loops through each child in the set (Grandchildren are selected when their parent is)
         
         if exportAsIndividual==True:#One FBX per child (Grandchildren merged with parents)
             cmds.select(child,add=False)#Adds the child to the selection
             outName=sceneDir+"/"+sceneNo+"_"+shotNo+"_"+parent+"_"+child+".fbx" #scene_shot_character_joint
-        elif exportAsIndividual==False:#One FBX per set (Set's children, grandchildren etc all in one FBX)
+        else:#One FBX per set (Set's children, grandchildren etc all in one FBX)
             cmds.select(child,add=True)
             outName=sceneDir+"/"+sceneNo+"_"+shotNo+"_"+parent+".fbx" #scene_shot_character_joint
 
+        print("Out path:",outName)
+        fbxCommand='file -force -options "" -typ "FBX export" -pr -es "'+outName+'";'#exports using default FBX export settings
+        mel.eval(fbxCommand)#Runs the command within MEL as there is no CMDS integration
+elif children!=None and len(children)==1:#If only one child is found
+        cmds.select(children[0])
+        outName=sceneDir+"/"+sceneNo+"_"+shotNo+"_"+parent+"_"+children[0]+".fbx" #scene_shot_character_joint
         
         print("Out path:",outName)
         fbxCommand='file -force -options "" -typ "FBX export" -pr -es "'+outName+'";'#exports using default FBX export settings
