@@ -15,14 +15,14 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QPushButton
 #-----File import/exporting-----
 def beginSetExporter(mayaBinDir,pluginDir,scenePath,exportAsIndividual):
     mayaCommand=mayaBinDir+"\mayapy "+pluginDir+"\setExporter.py "+scenePath+" "+exportAsIndividual #Command to be run
-    print(mayaCommand)
-    #subprocess.call(mayaCommand)#runs the command and waits until done. Printed output from subprocess is piped to invoker
-    #readImportPaths()
+    print("Mayapy command:",mayaCommand)
+    subprocess.call(mayaCommand)#runs the command and waits until done. Printed output from subprocess is piped to invoker
+    readImportPaths()
 
 def readImportPaths():#Reads paths of FBXs to import which were written by the setExporter
-    print("Reading exports")
     outPathFile=open(pluginDir+"outPaths.txt","r")#Opens the file
-    for outPath in outPathFile.readlines():#Loops through each line
+    print("Reading exported FBX paths from",outPathFile)
+    for outPath in outPathFile.readlines():#Loops through each line in txt
         outPath=outPath.replace("/","\\")
         outPath=outPath.replace("\n","")#Removes newlines (This line fixed a bug that took me 25 mins to troubleshoot)
         importFilebox(outPath) #Imports the file from the path
@@ -42,8 +42,9 @@ def importFilebox(importPath):
     import_task.save = True
 
     unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([import_task])    #Execute the import task
+    print("Imported file",importPath)
     os.remove(importPath) #Deletes the FBX produced by the exporter, as it is now saved within the UE project.
-
+    print("Deleted file",importPath,"\n")
 
 #-----UI-----
 
@@ -67,21 +68,25 @@ def initUI():#Launches the UI
     app.exec_()
 
 def getInputData(window):#Gets data from input boxes and then passes it to the maya parts of the script
-    print("Getting inputted data")
+    print("Getting data from input boxes")
     mayaBinDir=window.lineEdit_binPath.text()
     pluginDir=window.lineEdit_pluginPath.text()
     scenePath=window.lineEdit_scenePath.text()
 
+    print("Maya Bin Dir:",mayaBinDir)
+    print("Plugin Dir",pluginDir)
+    print("Scene Path:",scenePath)
+
+    #Converts radio button status to a string for passing to setExporter for exportAsIndividual argument
     if window.radioButton_exportAsIndividualTrue.isChecked():
         exportAsIndividual="individual"
     elif window.radioButton_exportAsIndividualFalse.isChecked():
         exportAsIndividual="single"
-
-    beginSetExporter(mayaBinDir,pluginDir,scenePath,exportAsIndividual)
     window.close()
+    beginSetExporter(mayaBinDir,pluginDir,scenePath,exportAsIndividual)
+    
 
 #-----main-----
-pluginDir=(os.path.realpath(__file__)).replace("mayaMakeUnrealInterface.py","")
-
+pluginDir=(os.path.realpath(__file__)).replace("mayaMakeUnrealInterface.py","")#Gets the plugin folder's path
 initUI()
 

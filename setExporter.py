@@ -7,11 +7,26 @@ import maya.standalone #runs maya headlessly
 import os
 import sys #arg reading
 
-outPathFile="D:\Coding\Python\VFX\Maya\MayaToUnreal\mayaToUnreal\outPaths.txt"
+outPathFile=(os.path.realpath(__file__)).replace("setExporter.py","outPaths.txt")
 
 def initMaya():
+    print("""
+ __________________
+< Maya Make Unreal >
+ ------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/
+                ||----w |
+                ||     ||
+          
+
+Launching headless Maya instance to export sets.
+          
+A lot of text is going to show in this window, all of it can be safely ignored.
+""")
     maya.standalone.initialize(name='python')#Starts a maya standalone instance (Essentially headless maya)
-    cmds.file(sceneFile, open=True, force=True)#Opens the given scene file
+    cmds.file(scenePath, open=True, force=True)#Opens the given scene file
 
 def getSets():
     # Get all sets from the outliner
@@ -23,24 +38,16 @@ def getOutName(exportAsIndividual,parent,child):#generates out path for FBX
     #Based on assumption of sceneNo_shotNo_versionNo
     sceneFullPath= cmds.file(q=True, sn=True) #Gets file name as string
     sceneDir = os.path.dirname(sceneFullPath)
-    sceneNo=(sceneFullPath.split("_")[0]).split("/")[-1]
-    shotNo=sceneFullPath.split("_")[1]
-    versionNo=(sceneFullPath.split("_")[2]).replace(".mb","")
-
-    print("Scene dir:",sceneDir)
-    print("Scene No:",sceneNo)
-    print("Shot No:",shotNo)
-    print("versionNo:",versionNo)
+    sceneName=sceneFullPath.split("/")[-1]#Scene file name (Removes path)
 
     if exportAsIndividual==True:
-        outName=sceneDir+"/"+sceneNo+"_"+shotNo+"_"+parent+"_"+child+".fbx" #scene_shot_character_joint
+        outName=sceneDir+"/"+sceneName+"_"+parent+"_"+child+".fbx"#SceneName_parentSet_childSet
     elif exportAsIndividual==False:
-        outName=sceneDir+"/"+sceneNo+"_"+shotNo+"_"+parent+".fbx" #scene_shot_character_joint
+        outName=sceneDir+"/"+sceneName+"_"+parent+".fbx"#SceneName_parentSet
 
     return outName
 
 def chooseSet(mayaSets):
-        # Print the sets
     print("Sets:")
     for setIndex, mayaSet in enumerate(mayaSets):
         print(setIndex,mayaSet)
@@ -76,8 +83,9 @@ def exportSet(parent):
 #main
             
 #command line args
-sceneFile = sys.argv[1] #Gets scene path from argument
+scenePath = sys.argv[1] #Gets scene path from argument
 exportAsIndividual=sys.argv[2] #Whether or not to export each child as a single FBX each, or export all children as one FBX
+
 
 #converts commandline string to bool
 if exportAsIndividual=="single":
