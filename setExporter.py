@@ -74,6 +74,9 @@ def exportSet(parent):
 
 
 #main
+            
+#command line args
+sceneFile = sys.argv[1] #Gets scene path from argument
 exportAsIndividual=sys.argv[2] #Whether or not to export each child as a single FBX each, or export all children as one FBX
 
 #converts commandline string to bool
@@ -82,7 +85,6 @@ if exportAsIndividual=="single":
 elif exportAsIndividual=="individual":
     exportAsIndividual=True
 
-sceneFile = sys.argv[1] #Gets scene path from argument
 open(outPathFile,"w").close()#Clears file on new run
 initMaya()
 mayaSets=getSets()
