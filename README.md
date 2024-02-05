@@ -14,6 +14,8 @@ Default install location (UE 5.3)
 ## Usage:
 Paste the following command into your command box within UE, making sure that it is set to "Python" and not "CMD" or "Python (REPL)":
 > C:\yourPathToThisPlugin\MayaToUnreal\mayaToUnreal\mayaMakeUnrealInterface.py
+
 For example, based on my installation I would run:
 > D:\Coding\Python\VFX\Maya\MayaToUnreal\mayaToUnreal\mayaMakeUnrealInterface.py
+
 Then ensure the values within the input boxes are correct, and click import. This will then export the children of a set named "exportSet"
