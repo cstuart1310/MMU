@@ -7,6 +7,7 @@ import unreal
 from PySide2 import *
 from PySide2.QtUiTools import *
 from PySide2.QtCore import *
+from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import *
 
 
@@ -75,7 +76,9 @@ def initUI():#Launches the UI
 
     #UI setup
     window.lineEdit_pluginPath.setText(pluginDir)#Sets the text in the plugin path to the gotten value
-    
+    print(pluginDir+"MMU_logo.png")
+    window.setWindowIcon(QIcon(pluginDir+"MMU_logo.png"))
+
     #buttons
     window.pushButton_import.clicked.connect(lambda: getInputData(window))#When import button is pressed, run getImportData
     window.pushButton_cancel.clicked.connect(lambda: window.close())#When cancel button is pressed, close the window

@@ -14,6 +14,10 @@
   <property name="windowTitle">
    <string>Maya-Make-Unreal</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>MMU_logo.png</normaloff>MMU_logo.png</iconset>
+  </property>
   <property name="whatsThis">
    <string notr="true"/>
   </property>
