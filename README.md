@@ -7,15 +7,17 @@ Introducing MMU (Mmm-Oooh)! A tool with the goal of simplifying this process wit
 ## Installation:
 Run the following command in a command prompt (CMD from the start menu). Make sure to change the path depending on your UE version and installation location
 Default install location (UE 5.3)
-> C:\Program Files\Epic Games\UE_5.3\Engine\Binaries\ThirdParty\Python3\Win64>python.exe -m pip install pyside2
+> "C:\Program Files\Epic Games\UE_5.3\Engine\Binaries\ThirdParty\Python3\Win64\python.exe" -m pip install pyside2
 
 [Download](https://github.com/cstuart1310/MMU/archive/refs/heads/MMU_revamped.zip) the repository as a Zip, place it in a location of your choice.
 
+Open your Unreal Project, then go to:
+Edit -> Project Settings -> Plugins - Python
+In the startup scripts section, add a new array element (Press the plus button). In the new text box, enter:
+> C:\yourPathToThisPlugin\windowAdder.py
+
+
+
 ## Usage:
-Paste the following command into your command box within UE, making sure that it is set to "Python" and not "CMD" or "Python (REPL)":
-> C:\yourPathToThisPlugin\MayaToUnreal\mayaToUnreal\mayaMakeUnrealInterface.py
-
-For example, based on my installation I would run:
-> D:\Coding\Python\VFX\Maya\MayaToUnreal\mayaToUnreal\mayaMakeUnrealInterface.py
-
-Then ensure the values within the input boxes are correct, and click import. This will then export the children of a set named "exportSet"
+Now when you open the Unreal project you installed the plugin to, there should be an "MMU" option at the top. Click this, then "Maya-Make-Unreal" to launch the UI.
+Once in the UI, ensure the inputted values are correct for the Maya bin path, location of the plugin's files, and the scene path. If they are all correct, click import. This will then import all geometry from the set named "exportSet" from the scene.
