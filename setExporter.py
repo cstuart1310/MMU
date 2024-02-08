@@ -26,8 +26,13 @@ Launching headless Maya instance to export sets.
 A lot of text is going to show in this window, all of it can be safely ignored.
 """)
     print("_"*20)#nice spacer
-    maya.standalone.initialize(name='python')#Starts a maya standalone instance (Essentially headless maya)
-    cmds.file(scenePath, open=True, force=True)#Opens the given scene file
+    # Initialize Maya in standalone mode
+    maya.standalone.initialize(name='python')
+
+    # Now you can perform any operations you need in Maya standalone mode
+
+    # For example, you might want to create a new scene
+    cmds.file(new=True, force=True)
 
 def getSets():
     # Get all sets from the outliner
@@ -87,7 +92,9 @@ def exportSet(parent):
 
 
 #main
-            
+
+
+
 #command line args
 scenePath = sys.argv[1] #Gets scene path from argument
 exportAsIndividual=sys.argv[2] #Whether or not to export each child as a single FBX each, or export all children as one FBX
@@ -100,12 +107,15 @@ elif exportAsIndividual=="individual":
     exportAsIndividual=True
 
 open(outPathFile,"w").close()#Clears file on new run
-initMaya()
-mayaSets=getSets()
-chosenSet="exportSet"#chooseSet(mayaSets)
-exportSet(chosenSet)
 
+try:
+    initMaya()
+    mayaSets=getSets()
+    chosenSet="exportSet"#chooseSet(mayaSets)
+    exportSet(chosenSet)
+    # Close the instance to prevent memory leak
+    maya.standalone.uninitialize()
 
-# Close the instance to prevent memory leak
-maya.standalone.uninitialize()
-
+except Exception as e:
+    print("Fatal error:",e,"\nPress enter to continue")
+    input(">")
