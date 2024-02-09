@@ -1,6 +1,6 @@
 # MAYA MAKE UNREAL
 
-Questions? Comments? Job opportunities? Contact me: https://linkedin.callumstuart.com
+*Questions? Comments? Job opportunities? Contact me: https://linkedin.callumstuart.com*
 
 I am very lazy. So lazy that the process of exporting files from Maya and then importing them to Unreal Engine seemed like a task that needed automating.
 
@@ -13,7 +13,7 @@ Run the following command in a command prompt (CMD from the start menu). Make su
 Default install location (UE 5.3)
 > "C:\Program Files\Epic Games\UE_5.3\Engine\Binaries\ThirdParty\Python3\Win64\python.exe" -m pip install pyside2
 
-[Download](https://github.com/cstuart1310/MMU/archive/refs/heads/MMU_revamped.zip) the repository as a Zip, place it in a location of your choice.
+[Download](https://github.com/cstuart1310/MMU/releases/tag/v0.01) the repository as a Zip, place it in a location of your choice.
 
 Open your Unreal Project, then go to:
 Edit -> Project Settings -> Plugins - Python
