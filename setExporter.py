@@ -5,9 +5,9 @@ import maya.cmds as cmds
 import maya.mel as mel #evaluating FBX exporter because afaik it doesn't have cmds integration
 import maya.standalone #runs maya headlessly
 import os
+import os.path
 import sys #arg reading
 
-outPathFile=(os.path.realpath(__file__)).replace("setExporter.py","outPaths.txt")
 
 def initMaya():
     print("""
@@ -91,14 +91,27 @@ def exportSet(parent):
             writeOutputPath(outName)
 
 
+def appendLog(logLines,logFilePath):#Adds each line in the array to a log file
+    try:
+        if os.path.isfile(logFilePath)==False:#if log file does not exist
+            (open(logFilePath,"w")).close()
+
+        for logLine in logLines:#For each line in the passed array
+            logLine=str(logLine)
+            logFile=open(logFilePath,"a")
+            logFile.write((logLine+"\n"))
+            logFile.close()
+    except Exception as e:
+        print(e)
+        input(">")
+
 #main
-
-
-
 #command line args
 scenePath = sys.argv[1] #Gets scene path from argument
 exportAsIndividual=sys.argv[2] #Whether or not to export each child as a single FBX each, or export all children as one FBX
-
+pluginDir=(os.path.realpath(__file__)).replace("setExporter.py","")
+outPathFile=pluginDir+"outPaths.txt"
+logFilePath=pluginDir+"log.txt"
 
 #converts commandline string to bool
 if exportAsIndividual=="single":
@@ -107,6 +120,7 @@ elif exportAsIndividual=="individual":
     exportAsIndividual=True
 
 open(outPathFile,"w").close()#Clears file on new run
+appendLog(["----------",("Scene:"+scenePath),("Export individual:"+str(exportAsIndividual)),("Plugin dir:"+pluginDir),("OutPathFile:"+outPathFile)],logFilePath)
 
 try:
     initMaya()
@@ -118,4 +132,5 @@ try:
 
 except Exception as e:
     print("Fatal error:",e,"\nPress enter to continue")
+    appendLog([e],logFilePath)
     input(">")
