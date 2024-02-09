@@ -1,3 +1,4 @@
+#Callum Stuart - https://linkedin.callumstuart.com https://github.com/cstuart1310 https://showreel.callumstuart.com
 import unreal
 import os
 

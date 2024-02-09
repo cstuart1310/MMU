@@ -1,3 +1,4 @@
+#Callum Stuart - https://linkedin.callumstuart.com https://github.com/cstuart1310 https://showreel.callumstuart.com
 #This script runs within the UE interpreter. It begins a subprocess which runs setExporter.py from the Mayapy interpreter. Once setExporter is done, this script imports the fbx into UE
 
 import subprocess #Call the setExporter from within the mayaPy interpreter
