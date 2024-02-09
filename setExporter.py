@@ -32,8 +32,7 @@ A lot of text is going to show in this window, all of it can be safely ignored.
     # Now you can perform any operations you need in Maya standalone mode
 
     # For example, you might want to create a new scene
-    cmds.file(new=True, force=True)
-
+    cmds.file(scenePath, open=True, force=True)#Opens the given scene file
 def getSets():
     # Get all sets from the outliner
     mayaSets=cmds.ls(type='objectSet')
