@@ -1,3 +1,7 @@
+# MAYA MAKE UNREAL
+
+Questions? Comments? Job opportunities? Contact me: https://linkedin.callumstuart.com
+
 I am very lazy. So lazy that the process of exporting files from Maya and then importing them to Unreal Engine seemed like a task that needed automating.
 
 Introducing MMU (Mmm-Oooh)! A tool with the goal of simplifying this process with a single UI which runs in Unreal Engine, allowing you to import Maya sets as FBX files without needing Maya open.
