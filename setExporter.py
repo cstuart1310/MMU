@@ -98,13 +98,13 @@ if exportAsIndividual=="single":
 elif exportAsIndividual=="individual":
     exportAsIndividual=True
 
-open(outPathFile,"w").close()#Clears file on new run
+open(outPathFile,"w").close()#Clears exported FBX file on new run
 initMaya()
 mayaSets=getSets()
 chosenSet="exportSet"#chooseSet(mayaSets)
 exportSet(chosenSet)
 
-
+print("-----Shutting down Maya-----")
 # Close the instance to prevent memory leak
 maya.standalone.uninitialize()
 

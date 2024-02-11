@@ -79,36 +79,43 @@ def initMainUI():#Launches the UI
 
     #UI setup
     mainWindow.lineEdit_pluginPath.setText(pluginDir)#Sets the text in the plugin path to the gotten value
-    print(pluginDir+"MMU_logo.png")
+
     mainWindow.setWindowIcon(QIcon(pluginDir+"MMU_logo.png"))
+    mayaBinDir, scenePath = getPastPaths()#Gets mayaBinDir and ScenePath (Not plugin path as that's worked out by sys)
+    setPathValues(mainWindow,pluginDir,mayaBinDir,scenePath)#Sets the path values to those read from txt or worked out by os lib
 
     #buttons
-    mainWindow.pushButton_import.clicked.connect(lambda: getInputData(mainWindow))#When import button is pressed, run getImportData
+    mainWindow.pushButton_import.clicked.connect(lambda: initImport(mainWindow))#When import button is pressed, run getImportData
     mainWindow.pushButton_cancel.clicked.connect(lambda: mainWindow.close())#When cancel button is pressed, close the mainWindow
-    mainWindow.pushButton_openSetSelector.clicked.connect(lambda: initSetSelector(setSelectorWindow))
+    mainWindow.pushButton_openSetSelector.clicked.connect(lambda: initSetSelector(setSelectorWindow,mainWindow))
 
     #File path buttons
     mainWindow.toolButton_scenePath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_scenePath,False))
     mainWindow.toolButton_pluginPath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_pluginPath,True))
     mainWindow.toolButton_binPath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_binPath,True))
-    binPath, scenePath = getPastPaths(mainWindow)#Gets binPath and ScenePath (Not plugin path as that's worked out by sys)
-    setPathValues(mainWindow,pluginDir,binPath,scenePath)
+
     mainWindow.show()
     app.exec_()
 
-def initSetSelector(setSelectorWindow):#starts the Set Selection window
-    setSelectorWindow.pushbutton_searchScene.clicked.connect(lambda: addSetsToUI(getSetsFromScene(scenePath)))
+def initSetSelector(setSelectorWindow,mainWindow):#starts the Set Selection window
+    pluginDir,mayaBinDir,scenePath,exportAsIndividual=getInputData(mainWindow)
+    setSelectorWindow.pushButton_searchScene.clicked.connect(lambda: addSetsToUI(getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow),setSelectorWindow))
 
     addSetsToUI(getSetsFromFile(),setSelectorWindow)#Initially reads txt for checkboxes
+    setSelectorWindow.label_setSource.setText("Sets loaded from previous run")
     setSelectorWindow.show()
 
-def getSetsFromScene(scenePath,mayaBinDir):#Reads sets by opening the scene via maya standalone
+def getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow):#Reads sets by opening the scene via maya standalone
     mayaCommand=mayaBinDir+"\mayapy "+pluginDir+"\setGetter.py "+scenePath #Command to be run
     print("Mayapy command:",mayaCommand)
     subprocess.call(mayaCommand)#runs the command and waits until done. Printed output from subprocess is piped to invoker
+    sceneName=str(scenePath.split("/")[-1])#Gets scene name from the last / onwards
+    setSelectorWindow.label_setSource.setText("Sets loaded from:"+sceneName)
+
+    return getSetsFromFile()#Reads the newly updated sets from the file
 
 
-def getSetsFromFile():#Reads sets from txt (Likely from previous run)
+def getSetsFromFile():#Reads sets from txt (either from prev run or new search)
     try:
         lastSets=open((pluginDir+"foundSets.txt"),"r").readlines()
         return lastSets
@@ -121,25 +128,38 @@ def getSetsFromFile():#Reads sets from txt (Likely from previous run)
 def addSetsToUI(sets,setSelectorWindow):
     if len(sets)>=1:
         gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
+        while gridLayout_sets.count():
+            item = gridLayout_sets.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+
         for setIndex,setName in enumerate(sets):
             setName=setName.replace("\n","")
             checkbox = QCheckBox(setName, setSelectorWindow)
             gridLayout_sets.addWidget(checkbox, setIndex, 0)
 
+def clearSetCheckboxesGrid(setSelectorWindow):
+    while setSelectorWindow.gridLayout_sets.count():
+        item = setSelectorWindow.gridLayout_sets.takeAt(0)
+        widget = item.widget()
+        if widget is not None:
+            widget.setParent(None)
 
-def getPastPaths(mainWindow):#Reads past successful values from file and places them into text boxes
+
+def getPastPaths():#Reads past successful values from file and places them into text boxes
     pastValueFile=(pluginDir+"lastValues.txt")
     if os.path.isfile(pastValueFile):#If there is a past value file
         pastValueFile = open(pastValueFile,"r")
         pastValues=pastValueFile.readlines()
-        binPath=pastValues[1].replace("\n","")
+        mayaBinDir=pastValues[1].replace("\n","")
         scenePath=pastValues[2].replace("\n","")
-        return binPath,scenePath
+        return mayaBinDir,scenePath
         #Doesn't set plugin path bcs plugin path must be correct for rest to work
     
-def setPathValues(mainWindow,pluginDir,binPath,scenePath):
+def setPathValues(mainWindow,pluginDir,mayaBinDir,scenePath):
     mainWindow.lineEdit_pluginPath.setText(pluginDir)
-    mainWindow.lineEdit_binPath.setText(binPath)
+    mainWindow.lineEdit_binPath.setText(mayaBinDir)
     mainWindow.lineEdit_scenePath.setText(scenePath)
 
 
@@ -153,7 +173,15 @@ def writePastValues(pluginDir,mayaBinDir,scenePath):#Saves values to text file
     pastValueFile.close()#Closes file and saves changes
     print("Saved paths to txt")
 
-def getInputData(mainWindow):#Gets data from input boxes and then passes it to the maya parts of the script
+def initImport(mainWindow):#Runs on import button press
+    pluginDir,mayaBinDir,scenePath,exportAsIndividual=getInputData(mainWindow)
+    mainWindow.close()
+    beginSetExporter(mayaBinDir,pluginDir,scenePath,exportAsIndividual)
+    writePastValues(pluginDir,mayaBinDir,scenePath)#If setExporter doesn't crash, saves successful values
+
+
+
+def getInputData(mainWindow):#Gets data from input boxes and then returns it
     print("Getting data from input boxes")
     mayaBinDir=mainWindow.lineEdit_binPath.text()
     pluginDir=mainWindow.lineEdit_pluginPath.text()
@@ -163,14 +191,13 @@ def getInputData(mainWindow):#Gets data from input boxes and then passes it to t
     print("Plugin Dir",pluginDir)
     print("Scene Path:",scenePath)
 
+
     #Converts radio button status to a string for passing to setExporter for exportAsIndividual argument
     if mainWindow.radioButton_exportAsIndividualTrue.isChecked():
         exportAsIndividual="individual"
     elif mainWindow.radioButton_exportAsIndividualFalse.isChecked():
         exportAsIndividual="single"
-    mainWindow.close()
-    beginSetExporter(mayaBinDir,pluginDir,scenePath,exportAsIndividual)
-    writePastValues(pluginDir,mayaBinDir,scenePath)#If setExporter doesn't crash, saves successful values
+    return pluginDir, mayaBinDir, scenePath, exportAsIndividual
     
 
 #-----main-----

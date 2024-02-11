@@ -74,7 +74,7 @@
     </layout>
    </item>
    <item row="0" column="0">
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="label_setSource">
      <property name="text">
       <string>Sets found in: SceneName</string>
      </property>
