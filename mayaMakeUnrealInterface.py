@@ -100,6 +100,7 @@ def initMainUI():#Launches the UI
 def initSetSelector(setSelectorWindow,mainWindow):#starts the Set Selection window
     pluginDir,mayaBinDir,scenePath,exportAsIndividual=getInputData(mainWindow)
     setSelectorWindow.pushButton_searchScene.clicked.connect(lambda: addSetsToUI(getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow),setSelectorWindow))
+    setSelectorWindow.pushButton_selectAll.clicked.connect(lambda: getSelectedSets(setSelectorWindow))
 
     addSetsToUI(getSetsFromFile(),setSelectorWindow)#Initially reads txt for checkboxes
     setSelectorWindow.label_setSource.setText("Sets loaded from previous run")
@@ -125,26 +126,39 @@ def getSetsFromFile():#Reads sets from txt (either from prev run or new search)
         return []#Returns an empty array
 
 
-def addSetsToUI(sets,setSelectorWindow):
-    if len(sets)>=1:
+def addSetsToUI(sets,setSelectorWindow):#Adds the passed array of sets to the UI as checkboxes with labels
+    if len(sets)>=1:#If there are no sets it will probably break
         gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
+
+        #clears the current list from the ui
         while gridLayout_sets.count():
             item = gridLayout_sets.takeAt(0)
             widget = item.widget()
             if widget is not None:
-                widget.setParent(None)
+                widget.setParent(None)#De-parents the checkbox to remove it (May be a memory leak tbh)
 
+        #adds the given list to the ui
         for setIndex,setName in enumerate(sets):
             setName=setName.replace("\n","")
             checkbox = QCheckBox(setName, setSelectorWindow)
             gridLayout_sets.addWidget(checkbox, setIndex, 0)
 
-def clearSetCheckboxesGrid(setSelectorWindow):
-    while setSelectorWindow.gridLayout_sets.count():
-        item = setSelectorWindow.gridLayout_sets.takeAt(0)
-        widget = item.widget()
-        if widget is not None:
-            widget.setParent(None)
+
+
+def getSelectedSets(setSelectorWindow):#returns an array of ticked set names
+    selectedSets=[]
+    gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
+    print("Checked sets:")
+    while gridLayout_sets.count():
+        setCheckbox = gridLayout_sets.takeAt(0)
+        setCheckboxWidget = setCheckbox.widget()
+        if setCheckboxWidget.isChecked():            
+            print(setCheckboxWidget.text())
+            selectedSets.append(setCheckboxWidget.text())
+    return selectedSets
+
+
+
 
 
 def getPastPaths():#Reads past successful values from file and places them into text boxes
