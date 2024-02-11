@@ -7,7 +7,6 @@ import maya.standalone #runs maya headlessly
 import os
 import sys #arg reading
 
-outPathFile=(os.path.realpath(__file__)).replace("setExporter.py","outPaths.txt")
 
 def initMaya():
     print("""
@@ -36,7 +35,6 @@ def getSets():
 
 
 def getOutName(exportAsIndividual,parent,child):#generates out path for FBX
-    #Based on assumption of sceneNo_shotNo_versionNo
     sceneFullPath= cmds.file(q=True, sn=True) #Gets file name as string
     sceneDir = os.path.dirname(sceneFullPath)
     sceneName=sceneFullPath.split("/")[-1]#Scene file name (Removes path)
@@ -87,7 +85,8 @@ def exportSet(parent):
 
 
 #main
-            
+outPathFile=(os.path.realpath(__file__)).replace("setExporter.py","outPaths.txt")
+
 #command line args
 scenePath = sys.argv[1] #Gets scene path from argument
 exportAsIndividual=sys.argv[2] #Whether or not to export each child as a single FBX each, or export all children as one FBX

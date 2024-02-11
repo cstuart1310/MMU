@@ -91,19 +91,36 @@ def initMainUI():#Launches the UI
     mainWindow.toolButton_scenePath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_scenePath,False))
     mainWindow.toolButton_pluginPath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_pluginPath,True))
     mainWindow.toolButton_binPath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_binPath,True))
-    loadPastValues(mainWindow)#Attempts to restore last successfully used values
+    loadMainPastValues(mainWindow)#Attempts to restore last successfully used values
     mainWindow.show()
     app.exec_()
 
 def initSetSelector(setSelectorWindow):#starts the Set Selection window
 
-    gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
-    for checkboxCounter in range(50):  # Add 10 checkboxes, you can adjust the count as needed
-        checkbox = QCheckBox(f'CheckBox {checkboxCounter + 1}', setSelectorWindow)
-        gridLayout_sets.addWidget(checkbox, checkboxCounter, 0)
+    
+    addSetsToUI(getLastSets(),setSelectorWindow)
     setSelectorWindow.show()
 
-def loadPastValues(mainWindow):#Reads past successful values from file and places them into text boxes
+def getLastSets():
+    try:
+        lastSets=open((pluginDir+"foundSets.txt"),"r").readlines()
+        return lastSets
+    except FileNotFoundError:
+        print("Saved sets file does not exist, creating now")
+        open((pluginDir+"foundSets.txt"),"w").close()#Creates an empty file
+        return []#Returns an empty array
+
+
+def addSetsToUI(sets,setSelectorWindow):
+    if len(sets)>=1:
+        gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
+        for setIndex,setName in enumerate(sets):
+            setName=setName.replace("\n","")
+            checkbox = QCheckBox(setName, setSelectorWindow)
+            gridLayout_sets.addWidget(checkbox, setIndex, 0)
+
+
+def loadMainPastValues(mainWindow):#Reads past successful values from file and places them into text boxes
     pastValueFile=(pluginDir+"lastValues.txt")
     if os.path.isfile(pastValueFile):#If there is a past value file
         pastValueFile = open(pastValueFile,"r")

@@ -119,6 +119,9 @@
       <property name="text">
        <string>Select Sets</string>
       </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
      </widget>
     </item>
    </layout>
