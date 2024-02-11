@@ -81,7 +81,7 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="pushButton_searchScene">
      <property name="text">
       <string>Search scene for sets</string>
      </property>

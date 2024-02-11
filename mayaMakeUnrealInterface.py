@@ -91,17 +91,24 @@ def initMainUI():#Launches the UI
     mainWindow.toolButton_scenePath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_scenePath,False))
     mainWindow.toolButton_pluginPath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_pluginPath,True))
     mainWindow.toolButton_binPath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_binPath,True))
-    loadMainPastValues(mainWindow)#Attempts to restore last successfully used values
+    binPath, scenePath = getPastPaths(mainWindow)#Gets binPath and ScenePath (Not plugin path as that's worked out by sys)
+    setPathValues(mainWindow,pluginDir,binPath,scenePath)
     mainWindow.show()
     app.exec_()
 
 def initSetSelector(setSelectorWindow):#starts the Set Selection window
+    setSelectorWindow.pushbutton_searchScene.clicked.connect(lambda: addSetsToUI(getSetsFromScene(scenePath)))
 
-    
-    addSetsToUI(getLastSets(),setSelectorWindow)
+    addSetsToUI(getSetsFromFile(),setSelectorWindow)#Initially reads txt for checkboxes
     setSelectorWindow.show()
 
-def getLastSets():
+def getSetsFromScene(scenePath,mayaBinDir):#Reads sets by opening the scene via maya standalone
+    mayaCommand=mayaBinDir+"\mayapy "+pluginDir+"\setGetter.py "+scenePath #Command to be run
+    print("Mayapy command:",mayaCommand)
+    subprocess.call(mayaCommand)#runs the command and waits until done. Printed output from subprocess is piped to invoker
+
+
+def getSetsFromFile():#Reads sets from txt (Likely from previous run)
     try:
         lastSets=open((pluginDir+"foundSets.txt"),"r").readlines()
         return lastSets
@@ -120,14 +127,23 @@ def addSetsToUI(sets,setSelectorWindow):
             gridLayout_sets.addWidget(checkbox, setIndex, 0)
 
 
-def loadMainPastValues(mainWindow):#Reads past successful values from file and places them into text boxes
+def getPastPaths(mainWindow):#Reads past successful values from file and places them into text boxes
     pastValueFile=(pluginDir+"lastValues.txt")
     if os.path.isfile(pastValueFile):#If there is a past value file
         pastValueFile = open(pastValueFile,"r")
         pastValues=pastValueFile.readlines()
+        binPath=pastValues[1].replace("\n","")
+        scenePath=pastValues[2].replace("\n","")
+        return binPath,scenePath
         #Doesn't set plugin path bcs plugin path must be correct for rest to work
-        mainWindow.lineEdit_binPath.setText(pastValues[1].replace("\n",""))
-        mainWindow.lineEdit_scenePath.setText(pastValues[2].replace("\n",""))
+    
+def setPathValues(mainWindow,pluginDir,binPath,scenePath):
+    mainWindow.lineEdit_pluginPath.setText(pluginDir)
+    mainWindow.lineEdit_binPath.setText(binPath)
+    mainWindow.lineEdit_scenePath.setText(scenePath)
+
+
+
 
 def writePastValues(pluginDir,mayaBinDir,scenePath):#Saves values to text file
     pastValueFile=open((pluginDir+"lastValues.txt"),"w")#Opens/creates the file, overwriting existing data
