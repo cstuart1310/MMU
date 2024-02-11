@@ -47,58 +47,70 @@ def importFilebox(importPath):
     os.remove(importPath) #Deletes the FBX produced by the exporter, as it is now saved within the UE project.
     print("Deleted file",importPath,"\n")
 
-def openFileDialog(window, lineEdit,chooseFolder):
+def openFileDialog(mainWindow, lineEdit,chooseFolder):
     options = QFileDialog.Options()
     options |= QFileDialog.DontUseNativeDialog
     fileDialog = QFileDialog()
 
     if chooseFolder==True:
-        folderPath = fileDialog.getExistingDirectory(window, "Open Folder", lineEdit.text(), options=options)
+        folderPath = fileDialog.getExistingDirectory(mainWindow, "Open Folder", lineEdit.text(), options=options)
         print("Folder Path:", folderPath)
         if folderPath != "":
             lineEdit.setText(folderPath)
     else:
-        filePath, _ = fileDialog.getOpenFileName(window, "Open File", lineEdit.text(), "All Files (*);;Text Files (*.txt)", options=options)
+        filePath, _ = fileDialog.getOpenFileName(mainWindow, "Open File", lineEdit.text(), "All Files (*);;Text Files (*.txt)", options=options)
         print("File Path:", filePath)
         if filePath != "":
             lineEdit.setText(filePath)
 
 #-----UI-----
 
-def initUI():#Launches the UI
+def initMainUI():#Launches the UI
     loader = QUiLoader()
     if not QApplication.instance():#If an instance does not exist
         app = QApplication(sys.argv)#Launch a new Qapplication
     else:#If an instance does exist
         app = QApplication.instance()#Launch a new instance
     uiPath=pluginDir+"\MMU_UE_UI.ui"
-    window = loader.load(uiPath, None)#Loads UI from file
+    setUiPath = pluginDir + "\setChooser_ui.ui"
+    mainWindow = loader.load(uiPath, None)#Loads UI from file
+    setSelectorWindow = loader.load(setUiPath, None)
+
 
     #UI setup
-    window.lineEdit_pluginPath.setText(pluginDir)#Sets the text in the plugin path to the gotten value
+    mainWindow.lineEdit_pluginPath.setText(pluginDir)#Sets the text in the plugin path to the gotten value
     print(pluginDir+"MMU_logo.png")
-    window.setWindowIcon(QIcon(pluginDir+"MMU_logo.png"))
+    mainWindow.setWindowIcon(QIcon(pluginDir+"MMU_logo.png"))
 
     #buttons
-    window.pushButton_import.clicked.connect(lambda: getInputData(window))#When import button is pressed, run getImportData
-    window.pushButton_cancel.clicked.connect(lambda: window.close())#When cancel button is pressed, close the window
+    mainWindow.pushButton_import.clicked.connect(lambda: getInputData(mainWindow))#When import button is pressed, run getImportData
+    mainWindow.pushButton_cancel.clicked.connect(lambda: mainWindow.close())#When cancel button is pressed, close the mainWindow
+    mainWindow.pushButton_openSetSelector.clicked.connect(lambda: initSetSelector(setSelectorWindow))
 
     #File path buttons
-    window.toolButton_scenePath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_scenePath,False))
-    window.toolButton_pluginPath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_pluginPath,True))
-    window.toolButton_binPath.clicked.connect(lambda: openFileDialog(window,window.lineEdit_binPath,True))
-    loadPastValues(window)#Attempts to restore last successfully used values
-    window.show()
+    mainWindow.toolButton_scenePath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_scenePath,False))
+    mainWindow.toolButton_pluginPath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_pluginPath,True))
+    mainWindow.toolButton_binPath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_binPath,True))
+    loadPastValues(mainWindow)#Attempts to restore last successfully used values
+    mainWindow.show()
     app.exec_()
 
-def loadPastValues(window):#Reads past successful values from file and places them into text boxes
+def initSetSelector(setSelectorWindow):#starts the Set Selection window
+
+    gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
+    for checkboxCounter in range(50):  # Add 10 checkboxes, you can adjust the count as needed
+        checkbox = QCheckBox(f'CheckBox {checkboxCounter + 1}', setSelectorWindow)
+        gridLayout_sets.addWidget(checkbox, checkboxCounter, 0)
+    setSelectorWindow.show()
+
+def loadPastValues(mainWindow):#Reads past successful values from file and places them into text boxes
     pastValueFile=(pluginDir+"lastValues.txt")
     if os.path.isfile(pastValueFile):#If there is a past value file
         pastValueFile = open(pastValueFile,"r")
         pastValues=pastValueFile.readlines()
         #Doesn't set plugin path bcs plugin path must be correct for rest to work
-        window.lineEdit_binPath.setText(pastValues[1].replace("\n",""))
-        window.lineEdit_scenePath.setText(pastValues[2].replace("\n",""))
+        mainWindow.lineEdit_binPath.setText(pastValues[1].replace("\n",""))
+        mainWindow.lineEdit_scenePath.setText(pastValues[2].replace("\n",""))
 
 def writePastValues(pluginDir,mayaBinDir,scenePath):#Saves values to text file
     pastValueFile=open((pluginDir+"lastValues.txt"),"w")#Opens/creates the file, overwriting existing data
@@ -108,22 +120,22 @@ def writePastValues(pluginDir,mayaBinDir,scenePath):#Saves values to text file
     pastValueFile.close()#Closes file and saves changes
     print("Saved paths to txt")
 
-def getInputData(window):#Gets data from input boxes and then passes it to the maya parts of the script
+def getInputData(mainWindow):#Gets data from input boxes and then passes it to the maya parts of the script
     print("Getting data from input boxes")
-    mayaBinDir=window.lineEdit_binPath.text()
-    pluginDir=window.lineEdit_pluginPath.text()
-    scenePath=window.lineEdit_scenePath.text()
+    mayaBinDir=mainWindow.lineEdit_binPath.text()
+    pluginDir=mainWindow.lineEdit_pluginPath.text()
+    scenePath=mainWindow.lineEdit_scenePath.text()
 
     print("Maya Bin Dir:",mayaBinDir)
     print("Plugin Dir",pluginDir)
     print("Scene Path:",scenePath)
 
     #Converts radio button status to a string for passing to setExporter for exportAsIndividual argument
-    if window.radioButton_exportAsIndividualTrue.isChecked():
+    if mainWindow.radioButton_exportAsIndividualTrue.isChecked():
         exportAsIndividual="individual"
-    elif window.radioButton_exportAsIndividualFalse.isChecked():
+    elif mainWindow.radioButton_exportAsIndividualFalse.isChecked():
         exportAsIndividual="single"
-    window.close()
+    mainWindow.close()
     beginSetExporter(mayaBinDir,pluginDir,scenePath,exportAsIndividual)
     writePastValues(pluginDir,mayaBinDir,scenePath)#If setExporter doesn't crash, saves successful values
     
@@ -132,5 +144,5 @@ def getInputData(window):#Gets data from input boxes and then passes it to the m
 pluginDir=(os.path.realpath(__file__)).replace("mayaMakeUnrealInterface.py","")#Gets the plugin folder's path
 
 
-initUI()
+initMainUI()
 

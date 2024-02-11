@@ -108,14 +108,14 @@
      </widget>
     </item>
     <item row="5" column="0">
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="label_setsSelected">
       <property name="text">
        <string>0 Sets selected</string>
       </property>
      </widget>
     </item>
     <item row="5" column="1">
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="pushButton_openSetSelector">
       <property name="text">
        <string>Select Sets</string>
       </property>
