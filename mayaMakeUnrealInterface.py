@@ -101,6 +101,7 @@ def initSetSelector(setSelectorWindow,mainWindow):#starts the Set Selection wind
     pluginDir,mayaBinDir,scenePath,exportAsIndividual=getInputData(mainWindow)
     setSelectorWindow.pushButton_searchScene.clicked.connect(lambda: addSetsToUI(getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow),setSelectorWindow))
     setSelectorWindow.pushButton_applySets.clicked.connect(lambda: applySets(setSelectorWindow,mainWindow))
+    setSelectorWindow.pushButton_cancelSets.clicked.connect(lambda: setSelectorWindow.close())
 
     print("Reading sets from file")
     addSetsToUI(getSetsFromFile(),setSelectorWindow)#Initially reads txt for checkboxes
