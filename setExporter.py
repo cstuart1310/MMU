@@ -5,6 +5,7 @@ import maya.cmds as cmds
 import maya.mel as mel #evaluating FBX exporter because afaik it doesn't have cmds integration
 import maya.standalone #runs maya headlessly
 import os
+import os.path
 import sys #arg reading
 
 
@@ -25,11 +26,21 @@ Launching headless Maya instance to export sets.
 A lot of text is going to show in this window, all of it can be safely ignored.
 """)
     print("_"*20)#nice spacer
-    maya.standalone.initialize(name='python')#Starts a maya standalone instance (Essentially headless maya)
+    # Initialize Maya in standalone mode
+    maya.standalone.initialize(name='python')
+
+    # Now you can perform any operations you need in Maya standalone mode
+
+    # For example, you might want to create a new scene
     cmds.file(scenePath, open=True, force=True)#Opens the given scene file
+def getSets():
+    # Get all sets from the outliner
+    mayaSets=cmds.ls(type='objectSet')
+    return mayaSets
 
 
 def getOutName(exportAsIndividual,parent,child):#generates out path for FBX
+    #Based on assumption of sceneNo_shotNo_versionNo
     sceneFullPath= cmds.file(q=True, sn=True) #Gets file name as string
     sceneDir = os.path.dirname(sceneFullPath)
     sceneName=sceneFullPath.split("/")[-1]#Scene file name (Removes path)
@@ -79,14 +90,27 @@ def exportSet(parent):
             writeOutputPath(outName)
 
 
-#main
-outPathFile=(os.path.realpath(__file__)).replace("setExporter.py","outPaths.txt")#path to store paths of fbxs to import
-setFilePath=(os.path.realpath(__file__)).replace("setExporter.py","sets.txt")#path of sets to export
+def appendLog(logLines,logFilePath):#Adds each line in the array to a log file
+    try:
+        if os.path.isfile(logFilePath)==False:#if log file does not exist
+            (open(logFilePath,"w")).close()
 
+        for logLine in logLines:#For each line in the passed array
+            logLine=str(logLine)
+            logFile=open(logFilePath,"a")
+            logFile.write((logLine+"\n"))
+            logFile.close()
+    except Exception as e:
+        print(e)
+        input(">")
+
+#main
 #command line args
 scenePath = sys.argv[1] #Gets scene path from argument
 exportAsIndividual=sys.argv[2] #Whether or not to export each child as a single FBX each, or export all children as one FBX
-
+pluginDir=(os.path.realpath(__file__)).replace("setExporter.py","")
+outPathFile=pluginDir+"outPaths.txt"
+logFilePath=pluginDir+"log.txt"
 
 #converts commandline string to bool
 if exportAsIndividual=="single":
@@ -94,14 +118,18 @@ if exportAsIndividual=="single":
 elif exportAsIndividual=="individual":
     exportAsIndividual=True
 
-open(outPathFile,"w").close()#Clears exported FBX file on new run
-initMaya()
-selectedSets=open(setFilePath,"r").readlines()#Reads user selected sets from txt
-for selectedSet in selectedSets:#Loops through user selected sets
-    selectedSet=selectedSet.replace("\n","")#removes newline from string
-    exportSet(selectedSet)#exports the set
+open(outPathFile,"w").close()#Clears file on new run
+appendLog(["----------",("Scene:"+scenePath),("Export individual:"+str(exportAsIndividual)),("Plugin dir:"+pluginDir),("OutPathFile:"+outPathFile)],logFilePath)
 
-print("-----Shutting down Maya-----")
-# Close the instance to prevent memory leak
-maya.standalone.uninitialize()
+try:
+    initMaya()
+    mayaSets=getSets()
+    chosenSet="exportSet"#chooseSet(mayaSets)
+    exportSet(chosenSet)
+    # Close the instance to prevent memory leak
+    maya.standalone.uninitialize()
 
+except Exception as e:
+    print("Fatal error:",e,"\nPress enter to continue")
+    appendLog([e],logFilePath)
+    input(">")
