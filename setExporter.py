@@ -28,11 +28,6 @@ A lot of text is going to show in this window, all of it can be safely ignored.
     maya.standalone.initialize(name='python')#Starts a maya standalone instance (Essentially headless maya)
     cmds.file(scenePath, open=True, force=True)#Opens the given scene file
 
-def getSets():
-    # Get all sets from the outliner
-    mayaSets=cmds.ls(type='objectSet')
-    return mayaSets
-
 
 def getOutName(exportAsIndividual,parent,child):#generates out path for FBX
     sceneFullPath= cmds.file(q=True, sn=True) #Gets file name as string
@@ -85,7 +80,8 @@ def exportSet(parent):
 
 
 #main
-outPathFile=(os.path.realpath(__file__)).replace("setExporter.py","outPaths.txt")
+outPathFile=(os.path.realpath(__file__)).replace("setExporter.py","outPaths.txt")#path to store paths of fbxs to import
+setFilePath=(os.path.realpath(__file__)).replace("setExporter.py","sets.txt")#path of sets to export
 
 #command line args
 scenePath = sys.argv[1] #Gets scene path from argument
@@ -100,9 +96,10 @@ elif exportAsIndividual=="individual":
 
 open(outPathFile,"w").close()#Clears exported FBX file on new run
 initMaya()
-mayaSets=getSets()
-chosenSet="exportSet"#chooseSet(mayaSets)
-exportSet(chosenSet)
+selectedSets=open(setFilePath,"r").readlines()#Reads user selected sets from txt
+for selectedSet in selectedSets:#Loops through user selected sets
+    selectedSet=selectedSet.replace("\n","")#removes newline from string
+    exportSet(selectedSet)#exports the set
 
 print("-----Shutting down Maya-----")
 # Close the instance to prevent memory leak

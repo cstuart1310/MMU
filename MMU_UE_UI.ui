@@ -110,7 +110,7 @@
     <item row="5" column="0">
      <widget class="QLabel" name="label_setsSelected">
       <property name="text">
-       <string>0 Sets selected</string>
+       <string>0 sets selected for export</string>
       </property>
      </widget>
     </item>

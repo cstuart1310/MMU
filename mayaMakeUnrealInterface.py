@@ -100,11 +100,26 @@ def initMainUI():#Launches the UI
 def initSetSelector(setSelectorWindow,mainWindow):#starts the Set Selection window
     pluginDir,mayaBinDir,scenePath,exportAsIndividual=getInputData(mainWindow)
     setSelectorWindow.pushButton_searchScene.clicked.connect(lambda: addSetsToUI(getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow),setSelectorWindow))
-    setSelectorWindow.pushButton_selectAll.clicked.connect(lambda: getSelectedSets(setSelectorWindow))
+    setSelectorWindow.pushButton_applySets.clicked.connect(lambda: applySets(setSelectorWindow,mainWindow))
 
+    print("Reading sets from file")
     addSetsToUI(getSetsFromFile(),setSelectorWindow)#Initially reads txt for checkboxes
     setSelectorWindow.label_setSource.setText("Sets loaded from previous run")
     setSelectorWindow.show()
+
+def applySets(setSelectorWindow,mainWindow):#On apply button click
+    print("Apply button clicked")
+    sets=getSelectedSets(setSelectorWindow)#gets arr of selected sets from the ui
+    print("Selected sets:",sets)
+    #writes sets into txt for reading from mayapy script
+    setsFile=open(setsFilePath,"w")
+    for mayaSet in sets:
+        setsFile.write(mayaSet+"\n")
+    setsFile.close()
+    mainWindow.label_setsSelected.setText((str(len(sets))+" sets selected for export"))
+    setSelectorWindow.close()
+
+
 
 def getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow):#Reads sets by opening the scene via maya standalone
     mayaCommand=mayaBinDir+"\mayapy "+pluginDir+"\setGetter.py "+scenePath #Command to be run
@@ -112,17 +127,16 @@ def getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow):#Reads se
     subprocess.call(mayaCommand)#runs the command and waits until done. Printed output from subprocess is piped to invoker
     sceneName=str(scenePath.split("/")[-1])#Gets scene name from the last / onwards
     setSelectorWindow.label_setSource.setText("Sets loaded from:"+sceneName)
-
     return getSetsFromFile()#Reads the newly updated sets from the file
 
 
 def getSetsFromFile():#Reads sets from txt (either from prev run or new search)
     try:
-        lastSets=open((pluginDir+"foundSets.txt"),"r").readlines()
+        lastSets=open(setsFilePath,"r").readlines()
         return lastSets
     except FileNotFoundError:
         print("Saved sets file does not exist, creating now")
-        open((pluginDir+"foundSets.txt"),"w").close()#Creates an empty file
+        open(setsFilePath,"w").close()#Creates an empty file
         return []#Returns an empty array
 
 
@@ -148,18 +162,13 @@ def addSetsToUI(sets,setSelectorWindow):#Adds the passed array of sets to the UI
 def getSelectedSets(setSelectorWindow):#returns an array of ticked set names
     selectedSets=[]
     gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
-    print("Checked sets:")
     while gridLayout_sets.count():
         setCheckbox = gridLayout_sets.takeAt(0)
         setCheckboxWidget = setCheckbox.widget()
         if setCheckboxWidget.isChecked():            
-            print(setCheckboxWidget.text())
             selectedSets.append(setCheckboxWidget.text())
+    print(selectedSets)
     return selectedSets
-
-
-
-
 
 def getPastPaths():#Reads past successful values from file and places them into text boxes
     pastValueFile=(pluginDir+"lastValues.txt")
@@ -188,6 +197,7 @@ def writePastValues(pluginDir,mayaBinDir,scenePath):#Saves values to text file
     print("Saved paths to txt")
 
 def initImport(mainWindow):#Runs on import button press
+    print("Beginning import process")
     pluginDir,mayaBinDir,scenePath,exportAsIndividual=getInputData(mainWindow)
     mainWindow.close()
     beginSetExporter(mayaBinDir,pluginDir,scenePath,exportAsIndividual)
@@ -216,6 +226,7 @@ def getInputData(mainWindow):#Gets data from input boxes and then returns it
 
 #-----main-----
 pluginDir=(os.path.realpath(__file__)).replace("mayaMakeUnrealInterface.py","")#Gets the plugin folder's path
+setsFilePath=(pluginDir+"sets.txt")
 
 
 initMainUI()
