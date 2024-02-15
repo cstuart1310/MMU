@@ -75,19 +75,32 @@ def initMainUI():#Launches the UI
     setUiPath = pluginDir + "\setChooser_ui.ui"
     mainWindow = loader.load(uiPath, None)#Loads UI from file
     setSelectorWindow = loader.load(setUiPath, None)
-
+    iconDir=pluginDir+"\icons"
 
     #UI setup
     mainWindow.lineEdit_pluginPath.setText(pluginDir)#Sets the text in the plugin path to the gotten value
 
-    mainWindow.setWindowIcon(QIcon(pluginDir+"MMU_logo.png"))
+    #set up icons
+    mainWindow.setWindowIcon(QIcon(iconDir+"\MMU_logo.png"))
+    mainWindow.toolButton_openPluginPath.setIcon(QIcon(iconDir+"/MMU_folder.png"))
+    mainWindow.toolButton_openScenePath.setIcon(QIcon(iconDir+"/MMU_folder.png"))
+    mainWindow.toolButton_openBinPath.setIcon(QIcon(iconDir+"/MMU_folder.png"))
+
+
+
     mayaBinDir, scenePath = getPastPaths()#Gets mayaBinDir and ScenePath (Not plugin path as that's worked out by sys)
     setPathValues(mainWindow,pluginDir,mayaBinDir,scenePath)#Sets the path values to those read from txt or worked out by os lib
 
     #buttons
     mainWindow.pushButton_import.clicked.connect(lambda: initImport(mainWindow))#When import button is pressed, run getImportData
     mainWindow.pushButton_cancel.clicked.connect(lambda: mainWindow.close())#When cancel button is pressed, close the mainWindow
-    mainWindow.pushButton_openSetSelector.clicked.connect(lambda: initSetSelector(setSelectorWindow,mainWindow))
+    mainWindow.pushButton_openSetSelector.clicked.connect(lambda: initSetSelector(setSelectorWindow,mainWindow))#when open sets is clicked, run the init function
+
+    mainWindow.toolButton_openPluginPath.clicked.connect(lambda: subprocess.Popen('explorer "'+pluginDir+'"'))
+    mainWindow.toolButton_openBinPath.clicked.connect(lambda: subprocess.Popen('explorer "'+mayaBinDir+'"'))
+    mainWindow.toolButton_openScenePath.clicked.connect(lambda: subprocess.Popen('explorer "'+os.path.normpath(os.path.dirname(scenePath))+'"'))
+
+
 
     #File path buttons
     mainWindow.toolButton_scenePath.clicked.connect(lambda: openFileDialog(mainWindow,mainWindow.lineEdit_scenePath,False))
@@ -99,6 +112,7 @@ def initMainUI():#Launches the UI
 
 def initSetSelector(setSelectorWindow,mainWindow):#starts the Set Selection window
     pluginDir,mayaBinDir,scenePath,exportAsIndividual=getInputData(mainWindow)
+    setSelectorWindow.setWindowIcon(QIcon(pluginDir+"\icons\MMU_logo.png"))
     setSelectorWindow.pushButton_searchScene.clicked.connect(lambda: addSetsToUI(getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow),setSelectorWindow))
     setSelectorWindow.pushButton_applySets.clicked.connect(lambda: applySets(setSelectorWindow,mainWindow))
     setSelectorWindow.pushButton_cancelSets.clicked.connect(lambda: setSelectorWindow.close())
@@ -139,24 +153,35 @@ def getSetsFromFile():#Reads sets from txt (either from prev run or new search)
         print("Saved sets file does not exist, creating now")
         open(setsFilePath,"w").close()#Creates an empty file
         return []#Returns an empty array
+    
+def setCheckboxState(setSelectorWindow):
+    gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
+    while gridLayout_sets.count():
+        item = gridLayout_sets.takeAt(0)
+        widget = item.widget()
+        if widget is not None:
+            widget.set
 
 
 def addSetsToUI(sets,setSelectorWindow):#Adds the passed array of sets to the UI as checkboxes with labels
     if len(sets)>=1:#If there are no sets it will probably break
         gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
-
-        #clears the current list from the ui
-        while gridLayout_sets.count():
-            item = gridLayout_sets.takeAt(0)
-            widget = item.widget()
-            if widget is not None:
-                widget.setParent(None)#De-parents the checkbox to remove it (May be a memory leak tbh)
-
+        clearAllCheckboxes(setSelectorWindow)
         #adds the given list to the ui
         for setIndex,setName in enumerate(sets):
             setName=setName.replace("\n","")
             checkbox = QCheckBox(setName, setSelectorWindow)
             gridLayout_sets.addWidget(checkbox, setIndex, 0)
+
+
+def clearAllCheckboxes(setSelectorWindow):#Clears checkboxes from the ui window
+    gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
+    #clears the current list from the ui
+    while gridLayout_sets.count():
+        item = gridLayout_sets.takeAt(0)
+        widget = item.widget()
+        if widget is not None:
+            widget.setParent(None)#De-parents the checkbox to remove it (May be a memory leak tbh)
 
 
 
