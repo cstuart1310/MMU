@@ -154,13 +154,14 @@ def getSetsFromFile():#Reads sets from txt (either from prev run or new search)
         open(setsFilePath,"w").close()#Creates an empty file
         return []#Returns an empty array
     
-def setCheckboxState(setSelectorWindow):
-    gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#Grid to add the set checkboxes to
-    while gridLayout_sets.count():
-        item = gridLayout_sets.takeAt(0)
-        widget = item.widget()
-        if widget is not None:
-            widget.set
+def setCheckboxState(setSelectorWindow, state):
+    print("Setting all checkboxes to", str(state))
+    gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#grid layout containing checkboxes
+    for index in range(gridLayout_sets.count()): #loops through each checkbox
+        widget = gridLayout_sets.itemAt(index).widget()
+        if widget is not None and isinstance(widget, QCheckBox):
+            print("Setting", widget.text(), "to", state)
+            widget.setChecked(state)
 
 
 def addSetsToUI(sets,setSelectorWindow):#Adds the passed array of sets to the UI as checkboxes with labels
