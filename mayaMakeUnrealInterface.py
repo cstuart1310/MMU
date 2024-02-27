@@ -113,9 +113,11 @@ def initMainUI():#Launches the UI
 def initSetSelector(setSelectorWindow,mainWindow):#starts the Set Selection window
     pluginDir,mayaBinDir,scenePath,exportAsIndividual=getInputData(mainWindow)
     setSelectorWindow.setWindowIcon(QIcon(pluginDir+"\icons\MMU_logo.png"))
-    setSelectorWindow.pushButton_searchScene.clicked.connect(lambda: addSetsToUI(getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow),setSelectorWindow))
-    setSelectorWindow.pushButton_applySets.clicked.connect(lambda: applySets(setSelectorWindow,mainWindow))
-    setSelectorWindow.pushButton_cancelSets.clicked.connect(lambda: setSelectorWindow.close())
+    setSelectorWindow.pushButton_selectAll.clicked.connect(lambda: setCheckboxState(setSelectorWindow,True))
+    setSelectorWindow.pushButton_clearAll.clicked.connect(lambda: setCheckboxState(setSelectorWindow,False))
+    setSelectorWindow.pushButton_searchScene.clicked.connect(lambda: addSetsToUI(getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow),setSelectorWindow))#gets sets from scene file
+    setSelectorWindow.pushButton_applySets.clicked.connect(lambda: applySets(setSelectorWindow,mainWindow))#applies changes to selection of sets
+    setSelectorWindow.pushButton_cancelSets.clicked.connect(lambda: setSelectorWindow.close())#closes the window
 
     print("Reading sets from file")
     addSetsToUI(getSetsFromFile(),setSelectorWindow)#Initially reads txt for checkboxes
