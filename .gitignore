@@ -9,3 +9,4 @@ setChooser_ui_ui.py
 foundSets.txt
 sets.txt
 *.psd
+selectedSets.txt

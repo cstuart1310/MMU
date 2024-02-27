@@ -81,7 +81,7 @@ def exportSet(parent):
 
 #main
 outPathFile=(os.path.realpath(__file__)).replace("setExporter.py","outPaths.txt")#path to store paths of fbxs to import
-setFilePath=(os.path.realpath(__file__)).replace("setExporter.py","sets.txt")#path of sets to export
+selectedSetFilePath=(os.path.realpath(__file__)).replace("setExporter.py","selectedSets.txt")#path of sets to export
 
 #command line args
 scenePath = sys.argv[1] #Gets scene path from argument
@@ -96,10 +96,11 @@ elif exportAsIndividual=="individual":
 
 open(outPathFile,"w").close()#Clears exported FBX file on new run
 initMaya()
-selectedSets=open(setFilePath,"r").readlines()#Reads user selected sets from txt
+
+selectedSets=open(selectedSetFilePath,"r").readlines()#Reads user selected sets from txt
 for selectedSet in selectedSets:#Loops through user selected sets
     selectedSet=selectedSet.replace("\n","")#removes newline from string
-    exportSet(selectedSet)#exports the set
+    exportSet(selectedSet)#exports
 
 print("-----Shutting down Maya-----")
 # Close the instance to prevent memory leak

@@ -34,6 +34,6 @@ def writeSets(sets):
       setFile.write(setName+"\n")
 
 scenePath=sys.argv[1]
-setFilePath=(os.path.realpath(__file__)).replace("setGetter.py","sets.txt")
+setFilePath=(os.path.realpath(__file__)).replace("setGetter.py","foundSets.txt")
 sets=getSets(scenePath)
 writeSets(sets)

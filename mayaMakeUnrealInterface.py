@@ -113,14 +113,17 @@ def initMainUI():#Launches the UI
 def initSetSelector(setSelectorWindow,mainWindow):#starts the Set Selection window
     pluginDir,mayaBinDir,scenePath,exportAsIndividual=getInputData(mainWindow)
     setSelectorWindow.setWindowIcon(QIcon(pluginDir+"\icons\MMU_logo.png"))
-    setSelectorWindow.pushButton_selectAll.clicked.connect(lambda: setCheckboxState(setSelectorWindow,True))
-    setSelectorWindow.pushButton_clearAll.clicked.connect(lambda: setCheckboxState(setSelectorWindow,False))
+    setSelectorWindow.pushButton_selectAll.clicked.connect(lambda: setCheckboxState(setSelectorWindow,None,True))
+    setSelectorWindow.pushButton_clearAll.clicked.connect(lambda: setCheckboxState(setSelectorWindow,None,False))
     setSelectorWindow.pushButton_searchScene.clicked.connect(lambda: addSetsToUI(getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow),setSelectorWindow))#gets sets from scene file
     setSelectorWindow.pushButton_applySets.clicked.connect(lambda: applySets(setSelectorWindow,mainWindow))#applies changes to selection of sets
     setSelectorWindow.pushButton_cancelSets.clicked.connect(lambda: setSelectorWindow.close())#closes the window
 
     print("Reading sets from file")
-    addSetsToUI(getSetsFromFile(),setSelectorWindow)#Initially reads txt for checkboxes
+    addSetsToUI(getSetsFromFile(foundSetsFilePath),setSelectorWindow)#Initially reads txt of all prev found sets for checkboxes
+    setCheckboxState(setSelectorWindow,getSetsFromFile(selectedSetsFilePath),True)#Sets previously enabled sets to enabled.
+
+
     setSelectorWindow.label_setSource.setText("Sets loaded from previous run")
     setSelectorWindow.show()
 
@@ -129,10 +132,10 @@ def applySets(setSelectorWindow,mainWindow):#On apply button click
     sets=getSelectedSets(setSelectorWindow)#gets arr of selected sets from the ui
     print("Selected sets:",sets)
     #writes sets into txt for reading from mayapy script
-    setsFile=open(setsFilePath,"w")
+    selectedSetsFile=open(selectedSetsFilePath,"w")
     for mayaSet in sets:
-        setsFile.write(mayaSet+"\n")
-    setsFile.close()
+        selectedSetsFile.write(mayaSet+"\n")
+    selectedSetsFile.close()
     mainWindow.label_setsSelected.setText((str(len(sets))+" sets selected for export"))
     setSelectorWindow.close()
 
@@ -144,26 +147,32 @@ def getSetsFromScene(pluginDir,mayaBinDir,scenePath,setSelectorWindow):#Reads se
     subprocess.call(mayaCommand)#runs the command and waits until done. Printed output from subprocess is piped to invoker
     sceneName=str(scenePath.split("/")[-1])#Gets scene name from the last / onwards
     setSelectorWindow.label_setSource.setText("Sets loaded from:"+sceneName)
-    return getSetsFromFile()#Reads the newly updated sets from the file
+    return getSetsFromFile(foundSetsFilePath)#Reads the newly updated sets from the file
 
 
-def getSetsFromFile():#Reads sets from txt (either from prev run or new search)
+def getSetsFromFile(setFile):
     try:
-        lastSets=open(setsFilePath,"r").readlines()
+        lastSets = open(setFile, "r").readlines()
+        # Remove newline characters from each array item
+        lastSets = [item.strip() for item in lastSets]
         return lastSets
     except FileNotFoundError:
         print("Saved sets file does not exist, creating now")
-        open(setsFilePath,"w").close()#Creates an empty file
-        return []#Returns an empty array
+        open(setFile, "w").close()  # Creates an empty file
+        return []  # Returns an empty array
+
     
-def setCheckboxState(setSelectorWindow, state):
-    print("Setting all checkboxes to", str(state))
+def setCheckboxState(setSelectorWindow, checkboxes, state):#Sets either all or specified checkboxes to true or false. If checkboxes is None, sets all, else only sets given
+    print(checkboxes)
     gridLayout_sets = setSelectorWindow.scrollArea_checkboxes.layout()#grid layout containing checkboxes
     for index in range(gridLayout_sets.count()): #loops through each checkbox
         widget = gridLayout_sets.itemAt(index).widget()
         if widget is not None and isinstance(widget, QCheckBox):
-            print("Setting", widget.text(), "to", state)
-            widget.setChecked(state)
+            if checkboxes !=None and widget.text() in checkboxes or checkboxes==None: #If only specific checkbox states to be changed and this is one of them, or all checkboxes to be changed
+                print("Setting", widget.text(), "to", state)
+                widget.setChecked(state)
+
+
 
 
 def addSetsToUI(sets,setSelectorWindow):#Adds the passed array of sets to the UI as checkboxes with labels
@@ -254,9 +263,10 @@ def getInputData(mainWindow):#Gets data from input boxes and then returns it
     
 
 #-----main-----
+print("__________Maya-Make-Unreal__________")
 pluginDir=(os.path.realpath(__file__)).replace("mayaMakeUnrealInterface.py","")#Gets the plugin folder's path
-setsFilePath=(pluginDir+"sets.txt")
-
-
+foundSetsFilePath=(pluginDir+"foundSets.txt")
+selectedSetsFilePath=(pluginDir+"selectedSets.txt")
 initMainUI()
+print("__________End of Maya-Make-Unreal__________")
 
